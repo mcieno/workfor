@@ -1,0 +1,9 @@
+---
+
+- hosts: localhost
+  become: true
+  roles:
+    - utils
+    - omz
+    - git
+    - docker

@@ -1,0 +1,26 @@
+---
+# tasks file for roles/utils
+
+- name: install utils
+  ansible.builtin.apt:
+    name:
+      - binutils
+      - curl
+      - gcc
+      - gdb
+      - hexedit
+      - htop
+      - ltrace
+      - make
+      - nano
+      - net-tools
+      - nload
+      - nmap
+      - openssl
+      - strace
+      - tar
+      - unzip
+      - wget
+      - xxd
+      - zip
+    state: latest

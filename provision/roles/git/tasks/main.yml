@@ -1,0 +1,43 @@
+---
+# tasks file for roles/git
+
+- name: install git
+  ansible.builtin.apt:
+    name:
+      - git
+      - git-lfs
+    state: latest
+
+- name: configure git
+  become_user: "{{ git_defaul_user }}"
+  ansible.builtin.git_config:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    scope: global
+  loop:
+    - {
+        name: "user.email",
+        value: "{{ git_user_email }}",
+      }
+    - {
+        name: "user.name",
+        value: "{{ git_user_name }}",
+      }
+    - {
+        name: "init.defaultBranch",
+        value: "main",
+      }
+    - {
+        name: "merge.ff",
+        value: "false",
+      }
+    - {
+        name: "pull.ff",
+        value: "only",
+      }
+
+- name: authorize github key
+  become_user: "{{ git_defaul_user }}"
+  ansible.builtin.command: |
+    ssh-import-id gh:{{ git_user_name }}
+  when: true

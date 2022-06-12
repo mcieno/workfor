@@ -1,0 +1,25 @@
+---
+# tasks file for roles/docker
+
+- name: check if docker command exists
+  when: true
+  failed_when: false
+  ansible.builtin.shell: |
+    command -v docker
+  register: check_docker
+
+- name: install docker
+  when: check_docker.rc != 0
+  ansible.builtin.shell: |
+    curl -fsSL https://get.docker.com | bash
+
+- name: create docker group
+  ansible.builtin.group:
+    name: docker
+    state: present
+
+- name: add user to docker group
+  ansible.builtin.user:
+    name: "{{ docker_default_user }}"
+    groups: docker
+    append: yes
