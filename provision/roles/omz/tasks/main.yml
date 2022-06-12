@@ -1,0 +1,84 @@
+---
+# tasks file for roles/omz
+
+- name: install zsh
+  ansible.builtin.apt:
+    name:
+      - zsh
+    state: latest
+
+- name: set default shell
+  ansible.builtin.user:
+    name: "{{ item }}"
+    shell: /bin/zsh
+    state: present
+  loop:
+    - root
+    - "{{ oh_my_zsh_default_user }}"
+
+- block:
+  - name: download omz
+    ansible.builtin.get_url:
+      url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+      dest: /tmp/omz-install
+      mode: 0755
+
+  - name: install omz
+    ansible.builtin.shell: zsh /tmp/omz-install || true
+    when: true
+    become_user: "{{ item }}"
+    loop:
+      - root
+      - "{{ oh_my_zsh_default_user }}"
+
+- name: personalize run commands
+  ansible.builtin.lineinfile:
+    path: "~{{ item.user }}/.zshrc"
+    line: "{{ item.line }}"
+    regexp: "{{ item.regexp }}"
+  loop:
+    - {
+        user: "{{ oh_my_zsh_default_user }}",
+        line: "alias s='sudo'",
+        regexp: "^alias s=",
+      }
+    - {
+        user: "root",
+        line: "alias myip='dig ip @dns.toys +short'",
+        regexp: "^alias myip=",
+      }
+    - {
+        user: "{{ oh_my_zsh_default_user }}",
+        line: "alias myip='dig ip @dns.toys +short'",
+        regexp: "^alias myip=",
+      }
+    - {
+        user: "root",
+        line: "export EDITOR=nano",
+        regexp: "^export EDITOR=",
+      }
+    - {
+        user: "{{ oh_my_zsh_default_user }}",
+        line: "export EDITOR=nano",
+        regexp: "^export EDITOR=",
+      }
+    - {
+        user: "root",
+        line: "plugins=(git docker)",
+        regexp: "^plugins=",
+      }
+    - {
+        user: "{{ oh_my_zsh_default_user }}",
+        line: "plugins=(git docker)",
+        regexp: "^plugins=",
+      }
+    - {
+        user: "root",
+        line: "ZSH_THEME=agnoster",
+        regexp: "^ZSH_THEME=",
+      }
+    - {
+        user: "{{ oh_my_zsh_default_user }}",
+        line: "ZSH_THEME=agnoster",
+        regexp: "^ZSH_THEME=",
+      }

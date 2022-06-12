@@ -1,0 +1,7 @@
+.env
+.env.*
+!.env.example
+
+inventory.yml
+inventory.yml.*
+!inventory.yml.example

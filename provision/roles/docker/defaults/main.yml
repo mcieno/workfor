@@ -1,0 +1,4 @@
+---
+# defaults file for roles/docker
+
+docker_default_user: ubuntu

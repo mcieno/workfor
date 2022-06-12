@@ -1,0 +1,8 @@
+all:
+  vars:
+    git_user_email: gituser@example.com
+    git_user_name: gituser
+
+  hosts:
+    localhost:
+      ansible_connection: local

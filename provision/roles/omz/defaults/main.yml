@@ -1,0 +1,4 @@
+---
+# defaults file for roles/omz
+
+oh_my_zsh_default_user: ubuntu

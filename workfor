@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+
+cd $(dirname $(readlink -f $0))
+
+set -o allexport
+source .env
+set +o allexport
+
+cli/workfor.py $@
