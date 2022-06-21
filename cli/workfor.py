@@ -108,6 +108,15 @@ def r(name: str) -> None:
     l()
 
 
+def s(name: str) -> None:
+    logging.info(f'connecting to {name.upper()} environment')
+
+    exitcode = run(f'multipass shell {name}')
+    if exitcode != 0:
+        logging.critical(f'unable to get a shell: exit code {exitcode}')
+        return
+
+
 def x(name: str) -> None:
     logging.info(f'restarting and preparing {name.upper()} environment')
 
@@ -209,6 +218,18 @@ if __name__ == '__main__':
     parser_r.add_argument(
         'name',
         help='name of the enviornment to permanently remove',
+        type=str,
+    )
+
+    parser_s = subparsers.add_parser(
+        's',
+        description='connect to the environment and get a shell',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        help='connect to the environment and get a shell',
+    )
+    parser_s.add_argument(
+        'name',
+        help='name of the enviornment to connect',
         type=str,
     )
 
