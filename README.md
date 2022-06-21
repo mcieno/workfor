@@ -19,7 +19,7 @@ customize the settings to your preference.
 | Option name             | Description                                                                                                                                | Default value  |
 |-------------------------|--------------------------------------------------------------------------------------------------------------------------------------------|----------------|
 | `MOUNT_BASE_PATH_HOST`  | Path on the host machine from where folders will be mounted into the environments. Workfor will be create one folder for each environment. | `~/Workspaces` |
-| `MOUNT_BASE_PATH_GUEST` | Path on the environment where folders will be mounted.                                                                                     | `/workspace`   |
+| `MOUNT_BASE_PATH_GUEST` | Path on the environment where folders will be mounted.                                                                                     | `/workspaces`  |
 
 Make sure everyhing works by running `./workfor -h`. If you see the command
 usage, then you're all set 🚀.
