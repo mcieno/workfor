@@ -44,6 +44,13 @@ def mount(name: str) -> None:
         logging.critical(f'unable to mount {mount_from} into {name}: exit code {exitcode}')
 
 
+def f(name: str, guest: int, host: int) -> None:
+    logging.info(f'forwarding environment port {guest} to host port {host}')
+    exitcode = run(f'ssh -N -T -L {host}:0.0.0.0:{guest} ubuntu@{name}')
+    if exitcode != 0:
+        logging.critical(f'unable to forward port from ubuntu@{name}: exit code {exitcode}: is ~/.ssh/config properly configured?')
+
+
 def i(name: str) -> None:
     logging.info(f'retrieving information about {name.upper()} environment')
     _ = run(f'multipass -v info {name}')
@@ -145,6 +152,31 @@ if __name__ == '__main__':
         dest='subcommand',
         title='subcommands',
         required=True,
+    )
+
+    parser_f = subparsers.add_parser(
+        'f',
+        description='forward a port from an environment to the host',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+        help='forward a port from an environment to the host',
+    )
+    parser_f.add_argument(
+        'name',
+        help='name of the enviornment to forward',
+        type=str,
+    )
+    parser_f_options = parser_f.add_argument_group('options')
+    parser_f_options.add_argument(
+        '--guest',
+        default=80,
+        help='port number on the development environment',
+        type=int,
+    )
+    parser_f_options.add_argument(
+        '--host',
+        default=8080,
+        help='port number on the host',
+        type=int,
     )
 
     parser_i = subparsers.add_parser(
