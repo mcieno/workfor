@@ -8,6 +8,13 @@
       - git-lfs
     state: latest
 
+- name: create global ignore-file
+  ansible.builtin.template:
+    src: .gitignore.j2
+    dest: "~{{ git_defaul_user }}/.gitignore"
+    owner: "{{ git_defaul_user }}"
+    group: "{{ git_defaul_user }}"
+
 - name: configure git
   become_user: "{{ git_defaul_user }}"
   ansible.builtin.git_config:
@@ -22,6 +29,10 @@
     - {
         name: "user.name",
         value: "{{ git_user_name }}",
+      }
+    - {
+        name: "core.excludesfile",
+        value: "~{{ git_defaul_user }}/.gitignore",
       }
     - {
         name: "init.defaultBranch",

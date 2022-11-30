@@ -218,13 +218,13 @@ if __name__ == '__main__':
     )
     parser_n_options.add_argument(
         '--cpus',
-        default=4,
+        default=6,
         help='number of vCPUs to assign to the environment',
         type=int,
     )
     parser_n_options.add_argument(
         '--disk',
-        default='50G',
+        default='64G',
         help='amount of disk to assign to the environment',
         type=str,
     )
@@ -236,7 +236,7 @@ if __name__ == '__main__':
     )
     parser_n_options.add_argument(
         '--mem',
-        default='6G',
+        default='12G',
         help='amount of memory to assign to the environment',
         type=str,
     )

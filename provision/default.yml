@@ -4,6 +4,7 @@
   become: true
   roles:
     - utils
+    - dns
     - omz
     - git
     - docker

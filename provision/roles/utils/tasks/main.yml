@@ -5,11 +5,14 @@
   ansible.builtin.apt:
     name:
       - binutils
+      - build-essential
+      - bash
       - curl
       - gcc
       - gdb
       - hexedit
       - htop
+      - jq
       - ltrace
       - make
       - nano
@@ -23,4 +26,59 @@
       - wget
       - xxd
       - zip
+      - zsh
     state: latest
+
+- name: install aws cli
+  block:
+    - name: downlaod installer
+      when: ansible_facts["architecture"] == "aarch64"
+      ansible.builtin.unarchive:
+        src: https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
+        dest: /tmp
+        remote_src: true
+        creates: /usr/local/bin/aws
+    - name: downlaod installer
+      when: ansible_facts["architecture"] != "aarch64"
+      ansible.builtin.unarchive:
+        src: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
+        dest: /tmp
+        remote_src: true
+        creates: /usr/local/bin/aws
+
+    - name: install
+      ansible.builtin.shell:
+        cmd: ./install --install-dir /usr/local/aws-cli --bin-dir /usr/local/bin
+        chdir: /tmp/aws
+        creates: /usr/local/bin/aws
+    - name: remove installation files
+      ansible.builtin.file:
+        path: /tmp/aws
+        state: absent
+
+- name: install terraform
+  block:
+    - name: downlaod installer
+      when: ansible_facts["architecture"] == "aarch64"
+      ansible.builtin.unarchive:
+        src: https://releases.hashicorp.com/terraform/1.3.6/terraform_1.3.6_linux_arm64.zip
+        dest: /tmp
+        remote_src: true
+        creates: /usr/local/bin/terraform
+    - name: downlaod installer
+      when: ansible_facts["architecture"] != "aarch64"
+      ansible.builtin.unarchive:
+        src: https://releases.hashicorp.com/terraform/1.3.6/terraform_1.3.6_linux_amd64.zip
+        dest: /tmp
+        remote_src: true
+        creates: /usr/local/bin/terraform
+
+    - name: install
+      ansible.builtin.shell:
+        cmd: install ./terraform /usr/local/bin
+        chdir: /tmp
+        creates: /usr/local/bin/terraform
+    - name: remove installation files
+      ansible.builtin.file:
+        path: /tmp/terraform
+        state: absent

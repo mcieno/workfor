@@ -1,0 +1,16 @@
+---
+# handlers file for roles/dns
+
+- name: Restart dnsmasq
+  systemd:
+    name: dnsmasq
+    enabled: true
+    state: restarted
+    daemon_reload: true
+
+- name: Restart systemd-resolved
+  systemd:
+    name: systemd-resolved
+    enabled: true
+    state: restarted
+    daemon_reload: true

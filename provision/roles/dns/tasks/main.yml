@@ -1,0 +1,20 @@
+---
+# tasks file for roles/dns
+
+- name: install dnsmasq
+  ansible.builtin.apt:
+    name:
+      - dnsmasq
+    state: latest
+
+- name: configure dnsmasq
+  ansible.builtin.template:
+    src: dnsmasq.conf.j2
+    dest: /etc/dnsmasq.d/custom.conf
+  notify: Restart dnsmasq
+
+- name: configure systemd-resolved
+  ansible.builtin.template:
+    src: resolved.conf.j2
+    dest: /etc/systemd/resolved.conf # Too lazy to create resolved.conf.d folder
+  notify: Restart systemd-resolved
