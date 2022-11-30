@@ -10,7 +10,7 @@
 - name: set default shell
   ansible.builtin.user:
     name: "{{ item }}"
-    shell: /bin/zsh
+    shell: /usr/bin/zsh
     state: present
   loop:
     - root
