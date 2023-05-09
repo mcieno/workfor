@@ -27,23 +27,6 @@ def run(cmd: str) -> int:
         return p.returncode
 
 
-def mount(name: str) -> None:
-    mount_base_path_host = os.environ.get('MOUNT_BASE_PATH_HOST') \
-        or os.path.join(os.path.expanduser('~'), 'Workspaces')
-    mount_base_path_guest = os.environ.get('MOUNT_BASE_PATH_GUEST') \
-        or '/workspaces'
-
-    mount_from = os.path.join(mount_base_path_host, name)
-    mount_dest = f'{mount_base_path_guest}/{name}'
-    os.makedirs(mount_from, exist_ok=True)
-
-    logging.info(f'mounting {mount_from} into {name}:{mount_dest}')
-
-    exitcode = run(f'multipass mount {mount_from} {name}:{mount_dest}')
-    if exitcode != 0:
-        logging.critical(f'unable to mount {mount_from} into {name}: exit code {exitcode}')
-
-
 def f(name: str, guest: int, host: int) -> None:
     logging.info(f'forwarding environment port {guest} to host port {host}')
     exitcode = run(f'ssh -N -T -L {host}:0.0.0.0:{guest} ubuntu@{name}')
@@ -93,8 +76,6 @@ def n(name: str, bridged: bool, cpus: int, disk: str, image: str, mem: str) -> N
     if exitcode != 0:
         logging.error(f'unable to umount {os.getcwd()} from {name}: exit code {exitcode}')
 
-    mount(name)
-
     i(name)
 
 
@@ -137,7 +118,7 @@ def x(name: str) -> None:
         logging.critical(f'unable to start environment: exit code {exitcode}')
         return
 
-    mount(name)
+    #mount(name)
 
     i(name)
 
