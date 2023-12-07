@@ -11,12 +11,12 @@
 - name: create global ignore-file
   ansible.builtin.template:
     src: .gitignore.j2
-    dest: "~{{ git_defaul_user }}/.gitignore"
-    owner: "{{ git_defaul_user }}"
-    group: "{{ git_defaul_user }}"
+    dest: "~{{ git_default_user }}/.gitignore"
+    owner: "{{ git_default_user }}"
+    group: "{{ git_default_user }}"
 
 - name: configure git
-  become_user: "{{ git_defaul_user }}"
+  become_user: "{{ git_default_user }}"
   ansible.builtin.git_config:
     name: "{{ item.name }}"
     value: "{{ item.value }}"
@@ -32,7 +32,7 @@
       }
     - {
         name: "core.excludesfile",
-        value: "~{{ git_defaul_user }}/.gitignore",
+        value: "~{{ git_default_user }}/.gitignore",
       }
     - {
         name: "init.defaultBranch",
@@ -48,7 +48,7 @@
       }
 
 - name: authorize github key
-  become_user: "{{ git_defaul_user }}"
+  become_user: "{{ git_default_user }}"
   ansible.builtin.command: |
     ssh-import-id gh:{{ git_user_name }}
   when: true

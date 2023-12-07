@@ -31,14 +31,14 @@
 
 - name: install aws cli
   block:
-    - name: downlaod installer
+    - name: download installer
       when: ansible_facts["architecture"] == "aarch64"
       ansible.builtin.unarchive:
         src: https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
         dest: /tmp
         remote_src: true
         creates: /usr/local/bin/aws
-    - name: downlaod installer
+    - name: download installer
       when: ansible_facts["architecture"] != "aarch64"
       ansible.builtin.unarchive:
         src: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
@@ -58,14 +58,14 @@
 
 - name: install terraform
   block:
-    - name: downlaod installer
+    - name: download installer
       when: ansible_facts["architecture"] == "aarch64"
       ansible.builtin.unarchive:
         src: https://releases.hashicorp.com/terraform/1.4.6/terraform_1.4.6_linux_arm64.zip
         dest: /tmp
         remote_src: true
         creates: /usr/local/bin/terraform
-    - name: downlaod installer
+    - name: download installer
       when: ansible_facts["architecture"] != "aarch64"
       ansible.builtin.unarchive:
         src: https://releases.hashicorp.com/terraform/1.4.6/terraform_1.4.6_linux_amd64.zip
