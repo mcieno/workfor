@@ -5,6 +5,6 @@
   roles:
     - utils
     - dns
-    - omz
     - git
     - docker
+    - omz
