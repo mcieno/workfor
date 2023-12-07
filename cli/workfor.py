@@ -205,7 +205,7 @@ if __name__ == '__main__':
     )
     parser_n_options.add_argument(
         '--disk',
-        default='64G',
+        default='100G',
         help='amount of disk to assign to the environment',
         type=str,
     )
