@@ -56,6 +56,19 @@
         path: /tmp/aws
         state: absent
 
+    - name: configure aws cli
+      ansible.builtin.file:
+        path: "~{{ awscli_default_user }}/.aws"
+        owner: "{{ awscli_default_user }}"
+        group: "{{ awscli_default_user }}"
+        state: directory
+    - name: configure aws cli
+      ansible.builtin.template:
+        src: .aws.j2
+        dest: "~{{ awscli_default_user }}/.aws/config"
+        owner: "{{ awscli_default_user }}"
+        group: "{{ awscli_default_user }}"
+
 - name: install terraform
   block:
     - name: download installer

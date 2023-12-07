@@ -1,2 +1,4 @@
 ---
 # defaults file for roles/utils
+
+awscli_default_user: ubuntu
