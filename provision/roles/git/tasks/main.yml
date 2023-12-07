@@ -8,44 +8,27 @@
       - git-lfs
     state: latest
 
-- name: create global ignore-file
+- name: ensure git config folder exists
+  ansible.builtin.file:
+    path: "~{{ git_default_user }}/.config/git"
+    state: directory
+    owner: "{{ git_default_user }}"
+    group: "{{ git_default_user }}"
+    recurse: true
+
+- name: create global gitignore-file
   ansible.builtin.template:
-    src: .gitignore.j2
-    dest: "~{{ git_default_user }}/.gitignore"
+    src: ignore.j2
+    dest: "~{{ git_default_user }}/.config/git/ignore"
     owner: "{{ git_default_user }}"
     group: "{{ git_default_user }}"
 
-- name: configure git
-  become_user: "{{ git_default_user }}"
-  ansible.builtin.git_config:
-    name: "{{ item.name }}"
-    value: "{{ item.value }}"
-    scope: global
-  loop:
-    - {
-        name: "user.email",
-        value: "{{ git_user_email }}",
-      }
-    - {
-        name: "user.name",
-        value: "{{ git_user_name }}",
-      }
-    - {
-        name: "core.excludesfile",
-        value: "~{{ git_default_user }}/.gitignore",
-      }
-    - {
-        name: "init.defaultBranch",
-        value: "main",
-      }
-    - {
-        name: "merge.ff",
-        value: "false",
-      }
-    - {
-        name: "pull.ff",
-        value: "only",
-      }
+- name: create global gitconfig-file
+  ansible.builtin.template:
+    src: config.j2
+    dest: "~{{ git_default_user }}/.config/git/config"
+    owner: "{{ git_default_user }}"
+    group: "{{ git_default_user }}"
 
 - name: authorize github key
   become_user: "{{ git_default_user }}"
