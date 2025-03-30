@@ -74,14 +74,14 @@
     - name: download installer
       when: ansible_facts["architecture"] == "aarch64"
       ansible.builtin.unarchive:
-        src: https://releases.hashicorp.com/terraform/1.6.5/terraform_1.6.5_linux_arm64.zip
+        src: https://releases.hashicorp.com/terraform/1.11.2/terraform_1.11.2_linux_arm64.zip
         dest: /tmp
         remote_src: true
         creates: /usr/local/bin/terraform
     - name: download installer
       when: ansible_facts["architecture"] != "aarch64"
       ansible.builtin.unarchive:
-        src: https://releases.hashicorp.com/terraform/1.6.5/terraform_1.6.5_linux_amd64.zip
+        src: https://releases.hashicorp.com/terraform/1.11.2/terraform_1.11.2_linux_amd64.zip
         dest: /tmp
         remote_src: true
         creates: /usr/local/bin/terraform
