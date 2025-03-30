@@ -211,7 +211,7 @@ if __name__ == '__main__':
     )
     parser_n_options.add_argument(
         '--image',
-        default='22.04',
+        default='24.04',
         help='type of image to launch',
         type=str,
     )
