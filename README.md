@@ -2,35 +2,40 @@
   <img width="100%" src=".assets/logo.svg"/>
 </p>
 <p align="center">
-  <em>Create and manage multiple isolated development environments.</em>
+  <em>Lightweight VMs for freelancers.</em>
 </p>
+
+## Requirements
+
+WorkFor requires [multipass](https://multipass.run) installed on the host.
 
 ## Installation
 
-Workfor requires [multipass](https://multipass.run) to be installed on the host.
+Clone this repo and copy file [`.env.example`](./.env.example) into a new file
+named `.env` and customize the global settings to your preference.
 
-The entrypoint is the [`workfor`](./workfor) wrapper script, which will start a
-Python CLI. Hence, make sure [Python](https://www.python.org) is installed in
-your system.
+The entrypoint is the [`workfor`](./workfor) script, which is just a wrapper
+around the multipass CLI. For convenience, consider creating an alias in your
+shell RC-file (e.g., `alias wf=/path/to/workfor`).
 
-Now, copy [`.env.example`](./.env.example) into a new file named `.env` and
-customize the settings to your preference.
+## Launch a new VM
 
-Make sure everyhing works by running `./workfor -h`. If you see the command
-usage, then you're all set 🚀.
+First things first, copy [`inventory.yml.example`](./inventory.yml.example)
+and customize the provisioning configuration to your preference.
 
-**Note:** a time saving idea would be to add an alias to the Workfor entrypoint.
-Something like this: `alias wf=/path/to/workfor`.
+If the VM name is `something`, WorkFor will look for provisioning configuration
+files `inventory.yml.something` and `inventory.yml`, in this order.
 
-## Create an environment
+When ready, launch and provision the new VM with
 
-When creating a new environment, the very first thing to do is configuring it.
+```sh
+# Change "something" with the VM name of your choice.
+wf n something
+```
 
-If the environment is named `something`, Workfor will look for configuration
-files `inventory.yml.something` and `inventory.yml`, in this
-order.
+Should the provisioning fail halfway through, try re-executing it with
 
-You can take a cue from [`inventory.yml.example`](./inventory.yml.example).
-
-When ready, you can start and provision the environment with Workfor (try
-running `wf n -h`).
+```sh
+# Change "something" with the VM name of your choice.
+wf p something
+```

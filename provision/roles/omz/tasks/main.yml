@@ -14,22 +14,16 @@
     state: present
   loop:
     - root
-    - "{{ oh_my_zsh_default_user }}"
+    - "{{ oh_my_zsh_default_user | mandatory }}"
 
-- block:
-  - name: download omz
-    ansible.builtin.get_url:
-      url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
-      dest: /tmp/omz-install
-      mode: 0755
-
-  - name: install omz
-    ansible.builtin.shell: zsh /tmp/omz-install || true
-    when: true
-    become_user: "{{ item }}"
-    loop:
-      - root
-      - "{{ oh_my_zsh_default_user }}"
+- name: install omz
+  become_user: "{{ item }}"
+  ansible.builtin.shell:
+    cmd: curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh | GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no" sh
+    creates: "~{{ item }}/.oh-my-zsh/oh-my-zsh.sh"
+  loop:
+    - root
+    - "{{ oh_my_zsh_default_user | mandatory }}"
 
 - name: personalize run commands
   ansible.builtin.lineinfile:
@@ -38,7 +32,7 @@
     regexp: "{{ item.regexp }}"
   loop:
     - {
-        user: "{{ oh_my_zsh_default_user }}",
+        user: "{{ oh_my_zsh_default_user | mandatory }}",
         line: "alias s='sudo'",
         regexp: "^alias s=",
       }
@@ -48,7 +42,7 @@
         regexp: "^alias myip=",
       }
     - {
-        user: "{{ oh_my_zsh_default_user }}",
+        user: "{{ oh_my_zsh_default_user | mandatory }}",
         line: "alias myip='dig ip @dns.toys +short'",
         regexp: "^alias myip=",
       }
@@ -58,7 +52,7 @@
         regexp: "^export EDITOR=",
       }
     - {
-        user: "{{ oh_my_zsh_default_user }}",
+        user: "{{ oh_my_zsh_default_user | mandatory }}",
         line: "export EDITOR=nano",
         regexp: "^export EDITOR=",
       }
@@ -68,7 +62,7 @@
         regexp: "^plugins=",
       }
     - {
-        user: "{{ oh_my_zsh_default_user }}",
+        user: "{{ oh_my_zsh_default_user | mandatory }}",
         line: "plugins=(git docker)",
         regexp: "^plugins=",
       }
@@ -78,7 +72,7 @@
         regexp: "^ZSH_THEME=",
       }
     - {
-        user: "{{ oh_my_zsh_default_user }}",
+        user: "{{ oh_my_zsh_default_user | mandatory }}",
         line: "ZSH_THEME=agnoster",
         regexp: "^ZSH_THEME=",
       }

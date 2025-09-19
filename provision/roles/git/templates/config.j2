@@ -1,6 +1,6 @@
 [user]
-    email = {{ git_user_email }}
-    name = {{ git_user_name }}
+    email = {{ git_user_email | mandatory }}
+    name = {{ git_user_name | mandatory }}
 
 [init]
     defaultBranch = main

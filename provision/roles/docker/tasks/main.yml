@@ -13,6 +13,6 @@
 
 - name: add user to docker group
   ansible.builtin.user:
-    name: "{{ docker_default_user }}"
+    name: "{{ docker_default_user | mandatory }}"
     groups: docker
     append: true

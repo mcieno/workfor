@@ -10,28 +10,34 @@
 
 - name: ensure git config folder exists
   ansible.builtin.file:
-    path: "~{{ git_default_user }}/.config/git"
+    path: "~{{ git_default_user | mandatory }}/.config/git"
     state: directory
-    owner: "{{ git_default_user }}"
-    group: "{{ git_default_user }}"
+    owner: "{{ git_default_user | mandatory }}"
+    group: "{{ git_default_user | mandatory }}"
     recurse: true
 
 - name: create global gitignore-file
   ansible.builtin.template:
     src: ignore.j2
-    dest: "~{{ git_default_user }}/.config/git/ignore"
-    owner: "{{ git_default_user }}"
-    group: "{{ git_default_user }}"
+    dest: "~{{ git_default_user | mandatory }}/.config/git/ignore"
+    owner: "{{ git_default_user | mandatory }}"
+    group: "{{ git_default_user | mandatory }}"
 
 - name: create global gitconfig-file
   ansible.builtin.template:
     src: config.j2
-    dest: "~{{ git_default_user }}/.config/git/config"
-    owner: "{{ git_default_user }}"
-    group: "{{ git_default_user }}"
+    dest: "~{{ git_default_user | mandatory }}/.config/git/config"
+    owner: "{{ git_default_user | mandatory }}"
+    group: "{{ git_default_user | mandatory }}"
 
-- name: authorize github key
-  become_user: "{{ git_default_user }}"
-  ansible.builtin.command: |
-    ssh-import-id gh:{{ git_user_name }}
-  when: true
+# - name: add github to known hosts
+#   become_user: "{{ git_default_user | mandatory }}"
+#   ansible.builtin.command:
+#     cmd: ssh-keyscan github.com >> ~/.ssh/known_hosts
+#     creates: "~{{ git_default_user | mandatory }}/.ssh/known_hosts"
+
+- name: authorize ssh from github keys
+  become_user: "{{ git_default_user | mandatory }}"
+  ansible.builtin.command:
+    cmd: ssh-import-id gh:{{ git_user_name }}
+    creates: "~{{ git_default_user | mandatory }}/.ssh/authorized_keys"

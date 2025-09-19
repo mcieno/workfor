@@ -1,12 +1,40 @@
-#!/usr/bin/env bash
-
-set -euo pipefail
-
-
-cd $(dirname $(readlink -f $0))
-
-set -o allexport
+#! /usr/bin/env -S bash -e -u -o pipefail
+cd "$(dirname "$(readlink -f "$0")")"
 source .env
-set +o allexport
 
-cli/workfor.py $@
+command -v multipass >/dev/null || { echo "multipass is not installed"; exit 1; }
+
+case "${1:--help}" in
+    l)
+        multipass -v list
+        ;;
+    s)
+        name="${2:?the name is required}"
+        read -p "Press enter to confirm stopping ${name}... "
+        multipass -v stop "${name}"
+        ;;
+    x)
+        name="${2:?the name is required}"
+        multipass -v start "${name}"
+        ;;
+    n)
+        name="${2:?the name is required}"
+        multipass -v launch \
+            --cpus="${WF_CPUS:?the number of CPUs is required}" \
+            --memory="${WF_MEMORY:?the amount of memory is required}" \
+            --disk="${WF_DISK:?the amount of disk is required}" \
+            --name="${name}" \
+            "${WF_IMAGE:?the image to launch is required}"
+        exec "$0" p "${name}"
+        ;;
+    p)
+        name="${2:?the name is required}"
+        multipass -v mount . "${name}:/mnt/wf" || true
+        trap "multipass -v umount '${name}:/mnt/wf'" EXIT
+        multipass -v exec "${name}" -- sudo /mnt/wf/provision/provision.sh
+        multipass -v info "${name}"
+        ;;
+    *)
+        exec multipass -v "$@"
+        ;;
+esac
