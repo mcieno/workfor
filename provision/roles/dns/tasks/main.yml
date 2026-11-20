@@ -1,20 +1,50 @@
 ---
 # tasks file for roles/dns
 
-- name: install dnsmasq
+- name: install DNS services
   ansible.builtin.apt:
     name:
       - dnsmasq
+      - systemd-resolved
     state: latest
 
 - name: configure dnsmasq
   ansible.builtin.template:
     src: dnsmasq.conf.j2
     dest: /etc/dnsmasq.d/custom.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/dnsmasq --test --conf-file=%s
   notify: Restart dnsmasq
 
 - name: configure systemd-resolved
   ansible.builtin.template:
     src: resolved.conf.j2
-    dest: /etc/systemd/resolved.conf # Too lazy to create resolved.conf.d folder
+    dest: /etc/systemd/resolved.conf
+    owner: root
+    group: root
+    mode: "0644"
   notify: Restart systemd-resolved
+
+- name: apply DNS configuration before switching the system resolver
+  ansible.builtin.meta: flush_handlers
+
+- name: enable and start DNS services
+  ansible.builtin.systemd_service:
+    name: "{{ item }}"
+    masked: false
+    enabled: true
+    state: started
+  loop:
+    - dnsmasq
+    - systemd-resolved
+
+- name: use the systemd-resolved stub resolver
+  ansible.builtin.file:
+    src: /run/systemd/resolve/stub-resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+    force: true
+    owner: root
+    group: root

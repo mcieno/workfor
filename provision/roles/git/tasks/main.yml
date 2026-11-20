@@ -35,9 +35,3 @@
 #   ansible.builtin.command:
 #     cmd: ssh-keyscan github.com >> ~/.ssh/known_hosts
 #     creates: "~{{ git_default_user | mandatory }}/.ssh/known_hosts"
-
-- name: authorize ssh from github keys
-  become_user: "{{ git_default_user | mandatory }}"
-  ansible.builtin.command:
-    cmd: ssh-import-id gh:{{ git_user_name }}
-    creates: "~{{ git_default_user | mandatory }}/.ssh/authorized_keys"

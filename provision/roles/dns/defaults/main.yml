@@ -1,2 +1,5 @@
 ---
 # defaults file for roles/dns
+
+dns_domain: "{{ undef(hint='Set dns_domain in your inventory.') }}"
+dns_upstream_server: "{{ undef(hint='Set dns_upstream_server in your inventory.') }}"

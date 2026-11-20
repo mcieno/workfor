@@ -13,9 +13,6 @@ source "${venvpath}/bin/activate"
 pip install --upgrade pip
 pip install -r requirements.txt
 
-inventory="../inventory.yml.$(hostname)"
-[ -f ${inventory} ] || inventory="../inventory.yml"
-
-ansible-playbook -i "${inventory}" default.yml
+ansible-playbook --inventory ../inventory.yml --extra-vars "workfor_machine=$(hostname)" default.yml
 
 deactivate

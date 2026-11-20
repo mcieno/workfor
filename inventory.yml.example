@@ -1,8 +1,11 @@
 all:
   vars:
+    dns_upstream_server: 0.250.250.200 # OrbStack's DNS resolver
     git_user_email: gituser@example.com
     git_user_name: gituser
 
   hosts:
-    localhost:
-      ansible_connection: local
+    something:
+      dns_domain: something.internal
+    another:
+      dns_domain: another.internal

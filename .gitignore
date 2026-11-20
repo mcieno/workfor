@@ -2,6 +2,10 @@
 .env.*
 !.env.example
 
+.rsyncignore
+.rsyncignore.*
+!.rsyncignore.example
+
 inventory.yml
 inventory.yml.*
 !inventory.yml.example

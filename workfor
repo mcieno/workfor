@@ -1,40 +1,113 @@
-#! /usr/bin/env -S bash -e -u -o pipefail
-cd "$(dirname "$(readlink -f "$0")")"
+#! /usr/bin/env -S bash -o errexit -o nounset -o pipefail
+script="$(readlink -f "$0")"
+cd "$(dirname "${script}")"
 source .env
 
-command -v multipass >/dev/null || { echo "multipass is not installed"; exit 1; }
+command -v orbctl >/dev/null || { echo "OrbStack (orbctl) is not installed"; exit 1; }
 
 case "${1:--help}" in
     l)
-        multipass -v list
+        exec orbctl list
         ;;
     s)
         name="${2:?the name is required}"
         read -p "Press enter to confirm stopping ${name}... "
-        multipass -v stop "${name}"
+        exec orbctl stop "${name}"
         ;;
     x)
         name="${2:?the name is required}"
-        multipass -v start "${name}"
+        exec orbctl start "${name}"
         ;;
     n)
         name="${2:?the name is required}"
-        multipass -v launch \
+        image="${WF_IMAGE:?the image to launch is required}"
+        # Keep accepting Ubuntu versions from existing Multipass configurations.
+        [[ "${image}" == *:* ]] || image="ubuntu:${image}"
+        orbctl create \
+            --isolated \
+            --isolate-network \
             --cpus="${WF_CPUS:?the number of CPUs is required}" \
             --memory="${WF_MEMORY:?the amount of memory is required}" \
             --disk="${WF_DISK:?the amount of disk is required}" \
-            --name="${name}" \
-            "${WF_IMAGE:?the image to launch is required}"
-        exec "$0" p "${name}"
+            --user=ubuntu \
+            "${image}" "${name}"
+        if [[ -n "${WF_AUTHORIZED_KEY:-}" ]]; then
+            printf '%s\n' "${WF_AUTHORIZED_KEY}" | \
+                orbctl run --machine "${name}" --user ubuntu --workdir /home/ubuntu \
+                    bash -o errexit -o nounset -o pipefail -c '
+                        IFS= read -r key
+                        umask 077
+                        mkdir -p "${HOME}/.ssh"
+                        touch "${HOME}/.ssh/authorized_keys"
+                        chmod 0700 "${HOME}/.ssh"
+                        chmod 0600 "${HOME}/.ssh/authorized_keys"
+                        printf "\n%s\n" "${key}" >> "${HOME}/.ssh/authorized_keys"
+                        sudo rm /etc/ssh/ssh_config.d/10-orbstack.conf
+                    '
+        fi
+        exec "${script}" p "${name}"
         ;;
     p)
         name="${2:?the name is required}"
-        multipass -v mount . "${name}:/mnt/wf" || true
-        trap "multipass -v umount '${name}:/mnt/wf'" EXIT
-        multipass -v exec "${name}" -- sudo /mnt/wf/provision/provision.sh
-        multipass -v info "${name}"
+        if [[ ! -f inventory.yml ]]; then
+            echo "inventory.yml is required" >&2
+            exit 1
+        fi
+        COPYFILE_DISABLE=1 tar --create --file - provision inventory.yml | \
+            orbctl run --machine "${name}" --user root --workdir /tmp \
+                bash -o errexit -o nounset -o pipefail -c '
+                    provision_dir="$(mktemp --directory /tmp/workfor.XXXXXXXXXX)"
+                    cleanup() { rm --recursive --force -- "${provision_dir}"; }
+                    trap cleanup EXIT
+                    tar --extract --file - --directory "${provision_dir}"
+                    "${provision_dir}/provision/provision.sh"
+                '
+        exec orbctl info "${name}"
+        ;;
+    b|w)
+        name="${2:?the name is required}"
+        if [[ ! "${name}" =~ ^[a-zA-Z0-9][a-zA-Z0-9_.-]*$ ]]; then
+            echo "Invalid machine name: ${name}" >&2
+            exit 1
+        fi
+        backup_path="${WF_BACKUP_PATH:?the backup path is required}/${name}"
+        for dependency in rsync ssh scp; do
+            command -v "${dependency}" >/dev/null || {
+                echo "${dependency} is not installed" >&2
+                exit 1
+            }
+        done
+        if [[ ! -f .rsyncignore ]]; then
+            echo ".rsyncignore is required; copy .rsyncignore.example and customize it" >&2
+            exit 1
+        fi
+        rsync_options=(
+            --archive --verbose --force
+            --exclude-from="${PWD}/.rsyncignore"
+            --rsh="ssh -o User=ubuntu@${name}"
+        )
+        case "$1" in
+            b)
+                read -r -p "Press enter to mirror ${name} into ${backup_path} (deletes stale backup files)... "
+                mkdir -p -- "${backup_path}"
+                backup_path="$(cd "${backup_path}" && pwd)"
+                rsync "${rsync_options[@]}" --delete orb:workspace/ "${backup_path}/"
+                exec scp -o "User=ubuntu@${name}" orb:.zsh_history "${backup_path}/"
+                ;;
+            w)
+                if [[ ! -d "${backup_path}" || ! -f "${backup_path}/.zsh_history" ]]; then
+                    echo "Backup directory with .zsh_history required: ${backup_path}" >&2
+                    exit 1
+                fi
+                backup_path="$(cd "${backup_path}" && pwd)"
+                read -r -p "Press enter to restore ${backup_path} into ${name} (overwrites matching files and shell history)... "
+                rsync "${rsync_options[@]}" --exclude='/.zsh_history' \
+                    "${backup_path}/" orb:workspace/
+                exec scp -o "User=ubuntu@${name}" "${backup_path}/.zsh_history" orb:.zsh_history
+                ;;
+        esac
         ;;
     *)
-        exec multipass -v "$@"
+        exec orbctl "$@"
         ;;
 esac
