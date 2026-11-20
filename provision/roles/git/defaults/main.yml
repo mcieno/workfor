@@ -4,4 +4,4 @@
 git_user_email: gituser@example.com
 git_user_name: gituser
 
-git_default_user: ubuntu
+git_default_user: "{{ workfor_user | default('ubuntu') }}"

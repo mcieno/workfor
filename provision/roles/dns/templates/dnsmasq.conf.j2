@@ -1,4 +1,12 @@
+{% set domain = dns_domain | mandatory %}
 no-resolv
+server={{ dns_upstream_server | mandatory }}
+# Listen on each interface address so systemd-resolved can keep 127.0.0.53:53.
 bind-dynamic
 
-address=/workspace.internal/127.0.0.1
+interface-name={{ domain }},eth0/4
+# Authoritative wildcard aliases follow the interface-backed record.
+auth-server={{ domain }}
+auth-zone={{ domain }}
+auth-ttl=0
+cname=*.{{ domain }},{{ domain }}

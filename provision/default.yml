@@ -1,6 +1,18 @@
 ---
 
-- hosts: localhost
+- name: Register the guest if it is missing from inventory
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Add the guest to the in-memory inventory
+      ansible.builtin.add_host:
+        name: "{{ workfor_machine | mandatory }}"
+      when: workfor_machine not in groups['all']
+      changed_when: false
+
+- hosts: "{{ workfor_machine | mandatory }}"
+  connection: local
   become: true
   roles:
     - utils
