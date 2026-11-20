@@ -31,29 +31,13 @@
 
 - name: install aws cli
   block:
-    - name: download installer
-      when: ansible_facts["architecture"] == "aarch64"
-      ansible.builtin.unarchive:
-        src: https://awscli.amazonaws.com/awscli-exe-linux-aarch64.zip
-        dest: /tmp
-        remote_src: true
-        creates: /usr/local/bin/aws
-    - name: download installer
-      when: ansible_facts["architecture"] != "aarch64"
-      ansible.builtin.unarchive:
-        src: https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip
-        dest: /tmp
-        remote_src: true
-        creates: /usr/local/bin/aws
-
     - name: install
       ansible.builtin.shell:
-        cmd: /tmp/aws/install --install-dir /usr/local/aws-cli --bin-dir /usr/local/bin
         creates: /usr/local/bin/aws
-    - name: remove installation files
-      ansible.builtin.file:
-        path: /tmp/aws
-        state: absent
+        executable: /usr/bin/bash
+        cmd: |
+          set -euo pipefail
+          curl -fsSL https://awscli.amazonaws.com/v2/install.sh | bash -s -- --system
 
     - name: configure aws cli
       ansible.builtin.file:
@@ -61,26 +45,29 @@
         owner: "{{ awscli_default_user | mandatory }}"
         group: "{{ awscli_default_user | mandatory }}"
         state: directory
+        mode: "0700"
     - name: configure aws cli
       ansible.builtin.template:
         src: .aws.j2
         dest: "~{{ awscli_default_user | mandatory }}/.aws/config"
         owner: "{{ awscli_default_user | mandatory }}"
         group: "{{ awscli_default_user | mandatory }}"
+        mode: "0600"
+        force: false
 
 - name: install terraform
   block:
-    - name: download installer
+    - name: download installer (arm64)
       when: ansible_facts["architecture"] == "aarch64"
       ansible.builtin.unarchive:
-        src: https://releases.hashicorp.com/terraform/1.13.3/terraform_1.13.3_linux_arm64.zip
+        src: https://releases.hashicorp.com/terraform/1.17.2/terraform_1.17.2_linux_arm64.zip
         dest: /tmp
         remote_src: true
         creates: /usr/local/bin/terraform
-    - name: download installer
+    - name: download installer (amd64)
       when: ansible_facts["architecture"] != "aarch64"
       ansible.builtin.unarchive:
-        src: https://releases.hashicorp.com/terraform/1.13.3/terraform_1.13.3_linux_amd64.zip
+        src: https://releases.hashicorp.com/terraform/1.17.2/terraform_1.17.2_linux_amd64.zip
         dest: /tmp
         remote_src: true
         creates: /usr/local/bin/terraform
@@ -94,3 +81,29 @@
       ansible.builtin.file:
         path: /tmp/terraform
         state: absent
+
+- name: install golang
+  block:
+    - name: install golang (arm64)
+      when: ansible_facts["architecture"] == "aarch64"
+      ansible.builtin.unarchive:
+        src: "https://go.dev/dl/go1.27.4.linux-arm64.tar.gz"
+        dest: /usr/local
+        remote_src: true
+        creates: /usr/local/go/bin/go
+    - name: install golang (amd64)
+      when: ansible_facts["architecture"] != "aarch64"
+      ansible.builtin.unarchive:
+        src: "https://go.dev/dl/go1.27.4.linux-amd64.tar.gz"
+        dest: /usr/local
+        remote_src: true
+        creates: /usr/local/go/bin/go
+
+    - name: add to path
+      ansible.builtin.lineinfile:
+        path: "/etc/zsh/zshenv"
+        line: 'export PATH="/usr/local/go/bin:$PATH"'
+        create: true
+        owner: root
+        group: root
+        mode: "0644"
