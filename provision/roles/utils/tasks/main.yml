@@ -16,6 +16,7 @@
       - jq
       - ltrace
       - make
+      - man-db
       - nano
       - net-tools
       - nload
@@ -26,6 +27,7 @@
       - strace
       - tar
       - unzip
+      - uuid-runtime
       - wget
       - xxd
       - zip
